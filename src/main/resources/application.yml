@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: demo-spring-security
+  data:
+    web:
+      pageable:
+        default-page-size: 10
+  profiles:
+    active: dev
+server:
+  servlet:
+    context-path: /api/v1
