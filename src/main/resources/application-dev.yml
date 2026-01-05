@@ -1,11 +1,8 @@
 spring:
-  config:
-    activate:
-      on-profile: dev
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://localhost:3307/spring_security_app
+    username: root
+    password: admin
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database: mysql
@@ -15,5 +12,5 @@ spring:
 application:
   security:
     jwt:
-      secret-key: ${JWT_SECRET_KEY}
-      expiration: ${JWT_EXPIRATION}
+      secret-key: bdf30e209bffe51f26ccb84854ed39d221f1628e3c0e2972eef4a0077a6be290
+      expiration: 8640000
