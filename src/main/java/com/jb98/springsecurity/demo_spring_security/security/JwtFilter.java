@@ -1,6 +1,7 @@
 package com.jb98.springsecurity.demo_spring_security.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jb98.springsecurity.demo_spring_security.exception.ErrorCode;
 import com.jb98.springsecurity.demo_spring_security.exception.ErrorResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -11,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,7 +25,9 @@ import java.io.IOException;
 import static com.jb98.springsecurity.demo_spring_security.exception.ErrorCode.EXPIRED_JWT;
 import static com.jb98.springsecurity.demo_spring_security.exception.ErrorCode.INVALID_JWT;
 import static com.jb98.springsecurity.demo_spring_security.exception.ErrorCode.USER_NOT_FOUND;
+import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Service
 @Slf4j
@@ -83,26 +85,26 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
             }
         } catch (UsernameNotFoundException ex) {
-            writeJwtErrorResponse(response, USER_NOT_FOUND.getTitle(), USER_NOT_FOUND.name(), USER_NOT_FOUND.getDefaultMessage());
+            writeJwtErrorResponse(response, USER_NOT_FOUND);
             return;
         } catch (ExpiredJwtException ex) {
-            writeJwtErrorResponse(response, EXPIRED_JWT.getTitle(), EXPIRED_JWT.name(), EXPIRED_JWT.getDefaultMessage());
+            writeJwtErrorResponse(response, EXPIRED_JWT);
             return;
         } catch (JwtException ex) {
-            writeJwtErrorResponse(response, INVALID_JWT.getTitle(), INVALID_JWT.name(), INVALID_JWT.getDefaultMessage());
+            writeJwtErrorResponse(response, INVALID_JWT);
             return;
         }
         filterChain.doFilter(request, response);
     }
 
-    private void writeJwtErrorResponse(HttpServletResponse response, String title, String error, String detail) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    private void writeJwtErrorResponse(HttpServletResponse response, ErrorCode error) throws IOException {
+        response.setStatus(SC_UNAUTHORIZED);
+        response.setContentType(APPLICATION_JSON_VALUE);
         var body = ErrorResponse
                 .builder()
-                .title(title)
-                .error(error)
-                .detail(detail)
+                .title(error.getTitle())
+                .error(error.name())
+                .detail(error.getDefaultMessage())
                 .build();
         new ObjectMapper().writeValue(response.getWriter(), body);
     }
