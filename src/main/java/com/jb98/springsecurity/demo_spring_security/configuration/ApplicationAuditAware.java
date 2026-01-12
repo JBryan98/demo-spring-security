@@ -11,10 +11,15 @@ public class ApplicationAuditAware implements AuditorAware<String> {
     @Override
     public Optional<String> getCurrentAuditor() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-            return Optional.empty();
+        // Scheduled jobs, batch processes, async tasks
+        if (authentication == null) {
+            return Optional.of("SYSTEM");
         }
-        var userPrincipal = (User) authentication.getPrincipal();
-        return Optional.ofNullable(userPrincipal.getUsername());
+        // Unauthenticated user
+        if (!authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
+            return Optional.of("ANONYMOUS");
+        }
+        var principal = (User) authentication.getPrincipal();
+        return Optional.ofNullable(principal.getUsername());
     }
 }
