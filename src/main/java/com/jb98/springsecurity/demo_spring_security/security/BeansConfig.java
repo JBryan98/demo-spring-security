@@ -14,8 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 @Configuration
 @RequiredArgsConstructor
 public class BeansConfig {
@@ -54,33 +52,11 @@ public class BeansConfig {
     }
 
     @Bean
-    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    public UrlBasedCorsConfigurationSource corsConfigurationSource(SecurityConfigPropertiesMapper corsOriginsConfig) {
         var configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(
-                List.of(
-                        "http://localhost:3000", // Nextjs
-                        "http://localhost:4200", // Angular
-                        "http://localhost:5173", "http://localhost:4173" // Vite
-                )
-        );
-        configuration.setAllowedMethods(
-                List.of(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "PATCH",
-                        "DELETE",
-                        "OPTIONS"
-                )
-        );
-
-        configuration.setAllowedHeaders(
-                List.of(
-                        "Authorization",
-                        "Content-Type",
-                        "Accept"
-                )
-        );
+        configuration.setAllowedOrigins(corsOriginsConfig.cors().allowedOrigins());
+        configuration.setAllowedMethods(corsOriginsConfig.cors().allowedMethods());
+        configuration.setAllowedHeaders(corsOriginsConfig.cors().allowedHeaders());
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
