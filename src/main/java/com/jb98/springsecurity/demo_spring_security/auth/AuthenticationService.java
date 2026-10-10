@@ -1,5 +1,6 @@
 package com.jb98.springsecurity.demo_spring_security.auth;
 
+import com.jb98.springsecurity.demo_spring_security.entity.Role;
 import com.jb98.springsecurity.demo_spring_security.entity.User;
 import com.jb98.springsecurity.demo_spring_security.security.JwtService;
 import jakarta.transaction.Transactional;
@@ -31,6 +32,14 @@ public class AuthenticationService {
         var user = (User) auth.getPrincipal();
         claims.put("username", user.getUsername());
         var jwtToken = jwtService.generateToken(claims, user);
-        return new AuthenticationResponse(jwtToken);
+        return new AuthenticationResponse(
+                jwtToken,
+                new AuthenticationResponse.Profile(
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getRoles().stream().map(Role::getName).toList()
+                )
+        );
     }
 }
