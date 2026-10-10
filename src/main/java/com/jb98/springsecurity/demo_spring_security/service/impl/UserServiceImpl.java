@@ -89,7 +89,10 @@ public class UserServiceImpl implements IUserService {
             validateUqEmail(request.email());
         }
         rqMapper.updateEntity(request, user);
-        populateUserRoles(user, request.roleIds());
+        // Only admin users can update roles
+        if(user.isAdmin()) {
+            populateUserRoles(user, request.roleIds());
+        }
         repository.save(user);
         return mapper.toDto(user);
     }
