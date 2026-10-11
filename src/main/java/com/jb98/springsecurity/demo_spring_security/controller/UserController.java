@@ -1,7 +1,8 @@
 package com.jb98.springsecurity.demo_spring_security.controller;
 
 import com.jb98.springsecurity.demo_spring_security.controller.request.ChangePasswordRequest;
-import com.jb98.springsecurity.demo_spring_security.controller.request.UserRequest;
+import com.jb98.springsecurity.demo_spring_security.controller.request.CreateUserRequest;
+import com.jb98.springsecurity.demo_spring_security.controller.request.UpdateUserRequest;
 import com.jb98.springsecurity.demo_spring_security.dto.UserDto;
 import com.jb98.springsecurity.demo_spring_security.service.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,14 +51,14 @@ public class UserController {
     @PostMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Create a new user.")
-    public ResponseEntity<UserDto> create(@RequestBody @Valid UserRequest request) {
+    public ResponseEntity<UserDto> create(@RequestBody @Valid CreateUserRequest request) {
         return new ResponseEntity<>(service.create(request), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or #id == authentication.principal.id")
     @Operation(summary = "Update an existing user by its ID.")
-    public ResponseEntity<UserDto> update(@PathVariable Long id, @RequestBody @Valid UserRequest request) {
+    public ResponseEntity<UserDto> update(@PathVariable Long id, @RequestBody @Valid UpdateUserRequest request) {
         return ResponseEntity.ok(service.update(id, request));
     }
 

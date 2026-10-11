@@ -1,7 +1,8 @@
 package com.jb98.springsecurity.demo_spring_security.service;
 
 import com.jb98.springsecurity.demo_spring_security.controller.request.ChangePasswordRequest;
-import com.jb98.springsecurity.demo_spring_security.controller.request.UserRequest;
+import com.jb98.springsecurity.demo_spring_security.controller.request.CreateUserRequest;
+import com.jb98.springsecurity.demo_spring_security.controller.request.UpdateUserRequest;
 import com.jb98.springsecurity.demo_spring_security.dto.UserDto;
 import com.jb98.springsecurity.demo_spring_security.entity.User;
 import com.jb98.springsecurity.demo_spring_security.exception.BusinessException;
@@ -42,7 +43,7 @@ public interface IUserService {
      * @return created user DTO
      * @throws DuplicateKeyException if the username already exists
      */
-    UserDto create(UserRequest request);
+    UserDto create(CreateUserRequest request);
 
     /**
      * Updates an existing user
@@ -52,7 +53,7 @@ public interface IUserService {
      * @throws DuplicateKeyException if the updated username already exists
      * @throws EntityNotFoundException if the user does not exist
      */
-    UserDto update(Long id, UserRequest request);
+    UserDto update(Long id, UpdateUserRequest request);
 
     /**
      * Returns the current user authenticated

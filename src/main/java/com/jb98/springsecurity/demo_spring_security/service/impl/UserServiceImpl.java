@@ -2,7 +2,8 @@ package com.jb98.springsecurity.demo_spring_security.service.impl;
 
 import com.jb98.springsecurity.demo_spring_security.controller.mapper.UserRequestMapper;
 import com.jb98.springsecurity.demo_spring_security.controller.request.ChangePasswordRequest;
-import com.jb98.springsecurity.demo_spring_security.controller.request.UserRequest;
+import com.jb98.springsecurity.demo_spring_security.controller.request.CreateUserRequest;
+import com.jb98.springsecurity.demo_spring_security.controller.request.UpdateUserRequest;
 import com.jb98.springsecurity.demo_spring_security.dto.UserDto;
 import com.jb98.springsecurity.demo_spring_security.entity.User;
 import com.jb98.springsecurity.demo_spring_security.exception.BusinessException;
@@ -67,7 +68,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public UserDto create(UserRequest request) {
+    public UserDto create(CreateUserRequest request) {
         log.info("create request {}", request);
         validateUqUsername(request.username());
         validateUqEmail(request.email());
@@ -79,12 +80,9 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public UserDto update(Long id, UserRequest request) {
+    public UserDto update(Long id, UpdateUserRequest request) {
         log.info("update id {} request {}", id, request);
         var user = find(id);
-        if (!user.getUsername().equals(request.username())) {
-            validateUqUsername(request.username());
-        }
         if (!user.getEmail().equals(request.email())) {
             validateUqEmail(request.email());
         }
@@ -109,7 +107,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public void changePassword(Long id, ChangePasswordRequest request) {
-        log.info("changePassword id {} password {}", id, request);
+        log.info("changePassword id {}", id);
         var currentUser = findCurrentUser();
         if (!currentUser.admin() && !currentUser.id().equals(id)) {
             throw new AccessDeniedException("You are not allowed to change this password");
