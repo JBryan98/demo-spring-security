@@ -1,6 +1,7 @@
 package com.jb98.springsecurity.demo_spring_security.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,6 +23,7 @@ import static com.jb98.springsecurity.demo_spring_security.exception.ErrorCode.I
 import static com.jb98.springsecurity.demo_spring_security.exception.ErrorCode.METHOD_ARGUMENT_NOT_VALID;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
@@ -110,6 +112,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
+        log.error("Unexpected error occurred: {}", ex.getMessage(), ex);
         return new ResponseEntity<>(
                 ErrorResponse
                         .builder()

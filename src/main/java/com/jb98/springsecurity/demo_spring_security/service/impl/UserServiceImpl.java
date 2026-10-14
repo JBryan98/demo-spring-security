@@ -17,7 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -26,8 +28,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,10 +50,29 @@ public class UserServiceImpl implements IUserService {
     @Transactional(readOnly = true)
     public Page<UserDto> findAll(Pageable pageable) {
         log.info("findAll pageable {}", pageable);
+        // This sort is mandatory because the query (findAllIdsOnly) is using a native query and the order of the results is not guaranteed without an explicit sort.
+        if (pageable.getSort().isUnsorted()) {
+            pageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by("id").ascending()
+            );
+        }
         var pageOfIds = repository.findAllIdsOnly(pageable);
-        var ids = Set.copyOf(pageOfIds.getContent());
-        var users = repository.findByIdIn(ids);
-        return new PageImpl<>(mapper.toDto(users), pageable, pageOfIds.getTotalElements());
+        var userIds = pageOfIds.getContent();
+        if (userIds.isEmpty()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, pageOfIds.getTotalElements());
+        }
+        var users = repository.findByIdIn(Set.copyOf(userIds));
+        var userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        var requestedUsers = userIds.stream()
+                .map(userMap::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(mapper.toDto(requestedUsers), pageable, pageOfIds.getTotalElements());
     }
 
     @Override
@@ -88,7 +112,7 @@ public class UserServiceImpl implements IUserService {
         }
         rqMapper.updateEntity(request, user);
         // Only admin users can update roles
-        if(user.isAdmin()) {
+        if (user.isAdmin()) {
             populateUserRoles(user, request.roleIds());
         }
         repository.save(user);
